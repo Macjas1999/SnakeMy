@@ -258,7 +258,7 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     largeAppleRespawn = largeAppleTimerMultp*speed*2; //+0000
     largeAppleCounter = false;
     largeAppleTimerActive = new wxTimer(this, 3);
-    largeAppleTimerActiveMultp = largeAppleTimerMultp*speed/2;
+    largeAppleTimerActiveMultp = largeAppleTimerMultp*speed;
 
     start = false;
     pause = false;

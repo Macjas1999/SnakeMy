@@ -176,6 +176,8 @@ private:
     void changeDirection(movSnakeDir);
     bool detectCollision(const wxPoint& object, const int from) const;
     bool onLostGame();
+    void aroundEdgeWrapping();
+
 };
 
 //Implementation of Snake class
@@ -288,12 +290,12 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     Connect(2, wxEVT_TIMER, wxCommandEventHandler(Snake::OnDrawLargeApple));
     Connect(3, wxEVT_TIMER, wxCommandEventHandler(Snake::OnActiveLargeApple));
 
-    //Movement logick
     wxPanel *sPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
     sPanel->Bind(wxEVT_CHAR_HOOK, &Snake::OnKeyDown, this);
 
 }
 
+//Movement logick
 void Snake::changeDirection(movSnakeDir snakeDir)
 {
     switch (snakeDir)
@@ -333,17 +335,37 @@ bool Snake::onLostGame()
             vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 10));
             vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 10));
             this->snakeDir = movSnakeDir::RIGHT;
+            Refresh();
             return true;
         }
     }
     return false;
 }
 
+void Snake::aroundEdgeWrapping()
+{
+    if (vecSnake[0].x > gridStart.x + xStep * 60)
+    {
+        vecSnake[0].x = gridStart.x;
+    }else if (vecSnake[0].x < gridStart.x + xStep)
+    {
+        vecSnake[0].x = gridStart.x + xStep * 60;
+    }
+
+    if (vecSnake[0].y > gridStart.y + yStep * 60)
+    {
+        vecSnake[0].y = gridStart.y;
+    }else if (vecSnake[0].y < gridStart.y + yStep)
+    {
+        vecSnake[0].y = gridStart.y + yStep * 60;
+    }
+}
+
 void Snake::moveSnake(movSnakeDir snakeDir)
 {
     wxPoint previousV = vecSnake[0];
     changeDirection(snakeDir);
-    
+
     if (onLostGame()){ return; }
     
     
@@ -355,23 +377,29 @@ void Snake::moveSnake(movSnakeDir snakeDir)
         previousV = previousVTemp;
     }
 
-    if (vecSnake[0].x > gridStart.x + xStep * 60)
-    {
-        vecSnake[0].x = gridStart.x;
-    }else if (vecSnake[0].x < gridStart.x)
-    {
-        vecSnake[0].x = gridStart.x + xStep * 60;
-    }
+    aroundEdgeWrapping();
 
-    if (vecSnake[0].y > gridStart.y + yStep * 60)
-    {
-        vecSnake[0].y = gridStart.y;
-    }else if (vecSnake[0].y < gridStart.y)
-    {
-        vecSnake[0].y = gridStart.y + yStep *60;
-    }
 }
 
+void Snake::nextApple(const wxPoint& pa, const wxPoint& pb)
+{
+	do {
+		apple.x = pa.x + random(1, 59) * xStep;
+		apple.y = pa.y + random(1, 59) * yStep;
+	} while (detectCollision(apple, 1));
+}
+
+void Snake::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
+{
+
+	do {
+		largeApple.x = pa.x + random(1, 59) * xStep;
+		largeApple.y = pa.y + random(1, 59) * yStep;
+	} while (detectCollision(largeApple, 1));
+
+}
+
+//Timers
 void Snake::OnTimer(wxCommandEvent& event)
 {
 
@@ -583,29 +611,10 @@ void Snake::drawApple(wxBufferedPaintDC& dc)
     dc.DrawBitmap(imageLoader->apple, apple.x - 6, apple.y - 6, false);
 }
 
-void Snake::nextApple(const wxPoint& pa, const wxPoint& pb)
-{
-	do {
-		apple.x = pa.x + random(0, 60) * xStep;
-		apple.y = pa.y + random(0, 60) * yStep;
-	} while (detectCollision(apple, 1));
-}
-
 //Large apple
-
 void Snake::drawLargeApple(wxBufferedPaintDC& dc)
 {
     dc.DrawBitmap(imageLoader->largeApple, largeApple.x - 10, largeApple.y - 10, false);   
-}
-
-void Snake::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
-{
-
-	do {
-		largeApple.x = pa.x + random(0, 60) * xStep;
-		largeApple.y = pa.y + random(0, 60) * yStep;
-	} while (detectCollision(largeApple, 1));
-
 }
 
 //Grid

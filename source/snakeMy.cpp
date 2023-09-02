@@ -175,7 +175,7 @@ private:
     void moveSnake(movSnakeDir);
     void changeDirection(movSnakeDir);
     bool detectCollision(const wxPoint& object, const int from) const;
-
+    bool onLostGame();
 };
 
 //Implementation of Snake class
@@ -315,28 +315,37 @@ bool Snake::detectCollision(const wxPoint& object, const int from) const
     }
 	return false;
 }
+bool Snake::onLostGame()
+{
+    for (int i = 1; i < vecSnake.size(); ++i)
+    {
+        if (detectCollision(vecSnake[0], 1))
+        {
+            wxMessageBox(wxT("LOST GAME\n To restart after closing this window press \'S\'"), wxT("END"));
+
+            this->pause = true;
+            this->start = false;
+            timer->Stop();
+            nextLargeApple(this->gridStart, this->gridEnd);
+            largeAppleTimer->Stop();
+            this->score = 0;
+            vecSnake.clear();
+            vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 10));
+            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 10));
+            this->snakeDir = movSnakeDir::RIGHT;
+            return true;
+        }
+    }
+    return false;
+}
 
 void Snake::moveSnake(movSnakeDir snakeDir)
 {
     wxPoint previousV = vecSnake[0];
     changeDirection(snakeDir);
-
-    for (int i = 1; i < vecSnake.size(); ++i)
-    {
-        if (detectCollision(vecSnake[0], 1))
-        {
-            // finish = true;
-            wxMessageBox(wxT("LOST GAME\n To restart after closing this window press \'S\'"), wxT("END"));
-
-            if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-            score = 0;
-            vecSnake.clear();
-            vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 10));
-            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 10));
-            this->snakeDir = movSnakeDir::RIGHT;
-            return;
-        }
-    }
+    
+    if (onLostGame()){ return; }
+    
     
     wxPoint previousVTemp;
     for (int i = 1; i < vecSnake.size(); ++i)

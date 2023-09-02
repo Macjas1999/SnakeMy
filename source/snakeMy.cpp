@@ -127,7 +127,7 @@ private:
     wxMenuBar *menuBar;
     wxMenuItem *menuQuit;
     wxMenuItem *reset;
-    wxMenu *speedChose;
+    wxMenu *speedChoice;
     wxMenuItem *speedLvL1;
     wxMenuItem *speedLvL2;
     wxMenuItem *speedLvL3;
@@ -170,11 +170,12 @@ private:
     void drawSnake(wxBufferedPaintDC &);
     void nextApple(const wxPoint &, const wxPoint &);
     void drawApple(wxBufferedPaintDC &);
-    bool collisionAppleSnake(const wxPoint &appleX, const int from = 0, bool firstOnly = false) const;
     void nextLargeApple(const wxPoint &, const wxPoint &);
     void drawLargeApple(wxBufferedPaintDC &);
-    bool collisionLargeAppleSnake(const wxPoint &appleX, const int from = 0, bool firstOnly = false) const;
     void moveSnake(movSnakeDir);
+    void changeDirection(movSnakeDir);
+    bool detectCollision(const wxPoint& object, const int from) const;
+
 };
 
 //Implementation of Snake class
@@ -210,34 +211,34 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
 
     menuBar = new wxMenuBar;
     menu = new wxMenu;
-    speedChose = new wxMenu;
+    speedChoice = new wxMenu;
     menuQuit = new wxMenuItem(menu, wxID_EXIT, wxT("&Quit"));
     reset = new wxMenuItem(menu, 6, wxT("&Reset"));
-    speedLvL1 = new wxMenuItem(speedChose, 11, wxT("&-3"));
-    speedLvL2 = new wxMenuItem(speedChose, 12, wxT("&-2"));
-    speedLvL3 = new wxMenuItem(speedChose, 13, wxT("&-1"));
-    speedLvL4 = new wxMenuItem(speedChose, 14, wxT("&Normal"));
-    speedLvL5 = new wxMenuItem(speedChose, 15, wxT("&+1"));
-    speedLvL6 = new wxMenuItem(speedChose, 16, wxT("&+2"));
-    speedLvL7 = new wxMenuItem(speedChose, 17, wxT("&+3"));
-    speedLvL8 = new wxMenuItem(speedChose, 18, wxT("&+4"));
-    speedLvL9 = new wxMenuItem(speedChose, 19, wxT("&+5"));
-    speedLvL10 = new wxMenuItem(speedChose, 20, wxT("&+6"));
+    speedLvL1 = new wxMenuItem(speedChoice, 11, wxT("&-3"));
+    speedLvL2 = new wxMenuItem(speedChoice, 12, wxT("&-2"));
+    speedLvL3 = new wxMenuItem(speedChoice, 13, wxT("&-1"));
+    speedLvL4 = new wxMenuItem(speedChoice, 14, wxT("&Normal"));
+    speedLvL5 = new wxMenuItem(speedChoice, 15, wxT("&+1"));
+    speedLvL6 = new wxMenuItem(speedChoice, 16, wxT("&+2"));
+    speedLvL7 = new wxMenuItem(speedChoice, 17, wxT("&+3"));
+    speedLvL8 = new wxMenuItem(speedChoice, 18, wxT("&+4"));
+    speedLvL9 = new wxMenuItem(speedChoice, 19, wxT("&+5"));
+    speedLvL10 = new wxMenuItem(speedChoice, 20, wxT("&+6"));
 
     menu->Append(menuQuit);
     menu->Append(reset);
     menuBar->Append(menu, wxT("&Menu"));
-    speedChose->Append(speedLvL1);
-    speedChose->Append(speedLvL2);
-    speedChose->Append(speedLvL3);
-    speedChose->Append(speedLvL4);
-    speedChose->Append(speedLvL5);
-    speedChose->Append(speedLvL6);
-    speedChose->Append(speedLvL7);
-    speedChose->Append(speedLvL8);
-    speedChose->Append(speedLvL9);
-    speedChose->Append(speedLvL10);
-    menuBar->Append(speedChose, wxT("&Change speed"));
+    speedChoice->Append(speedLvL1);
+    speedChoice->Append(speedLvL2);
+    speedChoice->Append(speedLvL3);
+    speedChoice->Append(speedLvL4);
+    speedChoice->Append(speedLvL5);
+    speedChoice->Append(speedLvL6);
+    speedChoice->Append(speedLvL7);
+    speedChoice->Append(speedLvL8);
+    speedChoice->Append(speedLvL9);
+    speedChoice->Append(speedLvL10);
+    menuBar->Append(speedChoice, wxT("&Change speed"));
     SetMenuBar(menuBar);
 
     // Grid settings
@@ -287,15 +288,14 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     Connect(2, wxEVT_TIMER, wxCommandEventHandler(Snake::OnDrawLargeApple));
     Connect(3, wxEVT_TIMER, wxCommandEventHandler(Snake::OnActiveLargeApple));
 
-    //Mvement
+    //Movement logick
     wxPanel *sPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
     sPanel->Bind(wxEVT_CHAR_HOOK, &Snake::OnKeyDown, this);
 
 }
 
-void Snake::moveSnake(movSnakeDir snakeDir)
+void Snake::changeDirection(movSnakeDir snakeDir)
 {
-    wxPoint previousV = vecSnake[0];
     switch (snakeDir)
     {
     case movSnakeDir::LEFT: { vecSnake[0].x = vecSnake[0].x - xStep; } break;
@@ -303,10 +303,27 @@ void Snake::moveSnake(movSnakeDir snakeDir)
 	case movSnakeDir::UP: { vecSnake[0].y = vecSnake[0].y - yStep; } break;
 	case movSnakeDir::DOWN: { vecSnake[0].y = vecSnake[0].y + yStep; } break;
     }
+}
+bool Snake::detectCollision(const wxPoint& object, const int from) const
+{
+    for (int i = from; i < vecSnake.size(); ++i)
+    {
+        if (vecSnake[i].x == object.x && vecSnake[i].y == object.y)
+        {
+			return true;
+        }
+    }
+	return false;
+}
+
+void Snake::moveSnake(movSnakeDir snakeDir)
+{
+    wxPoint previousV = vecSnake[0];
+    changeDirection(snakeDir);
 
     for (int i = 1; i < vecSnake.size(); ++i)
     {
-        if (collisionAppleSnake(vecSnake[0], 1))
+        if (detectCollision(vecSnake[0], 1))
         {
             // finish = true;
             wxMessageBox(wxT("LOST GAME\n To restart after closing this window press \'S\'"), wxT("END"));
@@ -353,14 +370,14 @@ void Snake::OnTimer(wxCommandEvent& event)
     {
         moveSnake(snakeDir);
     }
-    if (collisionAppleSnake(apple))
+    if (detectCollision(apple, 1))
     {
         vecSnake.push_back(vecSnake[vecSnake.size() - 1]);
         nextApple(gridStart, gridEnd);
         ++score;
         
     }
-    if(collisionLargeAppleSnake(largeApple))
+    if(detectCollision(largeApple, 1))
     {   
         nextLargeApple(gridStart, gridEnd);
         for (int i = 0; i < 5; i++)
@@ -551,23 +568,7 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
     }
 }
 
-bool Snake::collisionAppleSnake(const wxPoint& appleX, const int from, bool first_only) const
-{
-    if (first_only || vecSnake.size() == 1)
-    {
-        return vecSnake[0].x == appleX.x && vecSnake[0].y == appleX.y;
-    }
-    for (int i = from; i < vecSnake.size(); ++i)
-    {
-        if (vecSnake[i].x == appleX.x && vecSnake[i].y == appleX.y)
-        {
-			return true;
-        }
-    }
-	return false;
-}
-
-//Draw apple with image
+//Apple
 void Snake::drawApple(wxBufferedPaintDC& dc)
 {
     dc.DrawBitmap(imageLoader->apple, apple.x - 6, apple.y - 6, false);
@@ -578,25 +579,10 @@ void Snake::nextApple(const wxPoint& pa, const wxPoint& pb)
 	do {
 		apple.x = pa.x + random(0, 60) * xStep;
 		apple.y = pa.y + random(0, 60) * yStep;
-	} while (collisionAppleSnake(apple));
+	} while (detectCollision(apple, 1));
 }
 
 //Large apple
-bool Snake::collisionLargeAppleSnake(const wxPoint& largeApple, const int from, bool first_only) const
-{
-    if (first_only || vecSnake.size() == 1)
-    {
-        return vecSnake[0].x == largeApple.x && vecSnake[0].y == largeApple.y;
-    }
-    for (int i = from; i < vecSnake.size(); ++i)
-    {
-        if (vecSnake[i].x == largeApple.x && vecSnake[i].y == largeApple.y)
-        {
-			return true;
-        }
-    }
-	return false;
-}
 
 void Snake::drawLargeApple(wxBufferedPaintDC& dc)
 {
@@ -609,7 +595,7 @@ void Snake::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
 	do {
 		largeApple.x = pa.x + random(0, 60) * xStep;
 		largeApple.y = pa.y + random(0, 60) * yStep;
-	} while (collisionLargeAppleSnake(largeApple));
+	} while (detectCollision(largeApple, 1));
 
 }
 

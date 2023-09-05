@@ -1,0 +1,1 @@
+g++ -Isource source/snakeMy.cpp `wx-config --cxxflags --libs std` -o snakeMy

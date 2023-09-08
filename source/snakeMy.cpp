@@ -105,7 +105,7 @@ private:
     int largeAppleRespawn;
     int largeAppleTimerMultp;
     bool largeAppleCounter;
-    
+
     wxTimer *largeAppleTimerActive;
     int largeAppleTimerActiveMultp;
 
@@ -454,7 +454,7 @@ void Snake::PaintBcgr(wxDC& dc)
 
     dc.DrawRectangle(windowRect);
 }
-
+//TODO Display logick should be rewritten with subcalsses and functions not this if statement
 void Snake::drawSnake(wxBufferedPaintDC& dc)
 {
     //Snake Body

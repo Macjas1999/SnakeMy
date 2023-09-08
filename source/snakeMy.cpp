@@ -28,7 +28,8 @@
 
 using namespace std;
 
-// Random gen 
+
+// Pseudorandom genrerator
 int random(int min, int max)
 {
 	return min + rand() % (max - min + 1);
@@ -54,6 +55,7 @@ protected:
     void OnTimer(wxCommandEvent &);
     void OnDrawLargeApple(wxCommandEvent &);
     void OnActiveLargeApple(wxCommandEvent &);
+    
     void OnQuit(wxCommandEvent &);
     void OnReset(wxCommandEvent &);
 
@@ -87,20 +89,23 @@ private:
     wxMenuItem *speedLvL9;
     wxMenuItem *speedLvL10;
 
-    wxPoint gridStart;
-    wxPoint gridEnd;
     int xStep;
     int yStep;
+
+    wxPoint gridStart;
+    wxPoint gridEnd;
     vector<wxPoint> vecSnake;
     wxPoint apple;
     wxPoint largeApple;
 
     wxTimer *timer;
     int speed;
+
     wxTimer *largeAppleTimer;
     int largeAppleRespawn;
     int largeAppleTimerMultp;
     bool largeAppleCounter;
+    
     wxTimer *largeAppleTimerActive;
     int largeAppleTimerActiveMultp;
 
@@ -397,7 +402,7 @@ void Snake::OnActiveLargeApple(wxCommandEvent& event){
     largeAppleTimer->Start(largeAppleRespawn);
 }
 
-
+//Handling keyboard input
 void Snake::OnKeyDown(wxKeyEvent& event)
 {
     int key = event.GetKeyCode();
@@ -454,10 +459,10 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
 {
     //Snake Body
 
-    //Segments display hand
+    //Segments display logick
     for (int i = 1; i < vecSnake.size(); ++i) {
         // xSTEP
-        //TurnVerti
+        //TurnVertical
 		if(vecSnake[i-2].x == vecSnake[i-1].x && vecSnake[i].y == vecSnake[i-1].y)
         {
             if(vecSnake[i].x < vecSnake[i-1].x && vecSnake[i-1].y < vecSnake[i-2].y)
@@ -483,7 +488,7 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
         }
 
         // ySTEP
-        //TurnHori
+        //TurnHorizontal
 		if(vecSnake[i-2].y == vecSnake[i-1].y && vecSnake[i].x == vecSnake[i-1].x)
         {
             if(vecSnake[i].y > vecSnake[i-1].y && vecSnake[i-1].x > vecSnake[i-2].x)
@@ -577,6 +582,7 @@ void Snake::drawGrid(wxBufferedPaintDC& dc, const wxPoint& pa, const wxPoint& pb
 		dc.DrawLine(wxPoint(i, pa.y), wxPoint(i, pb.y));
 }
 
+//Main paint event
 void Snake::OnPaint(wxPaintEvent& event)
 {
 	wxBufferedPaintDC dc(this);
@@ -612,6 +618,7 @@ void Snake::OnPaint(wxPaintEvent& event)
 	dc.SetPen(wxNullPen); 
 }
 
+//Gameplay controll functions
 void Snake::OnReset(wxCommandEvent& event)
 { 
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
@@ -696,8 +703,6 @@ void Snake::OnQuit(wxCommandEvent& event)
 {
 	Close(true);
 }
-
-
 
 ///////////////////////////// 
 // MyApp

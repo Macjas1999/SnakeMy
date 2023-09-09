@@ -144,10 +144,10 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     list = new wxString[]
     {
     "images/appleImg.png", 
-    "images/snakeBodyLDDLS.png",
-    "images/snakeBodyLUULS.png",
-    "images/snakeBodyRDDRS.png",
-    "images/snakeBodyRUURS.png",
+    "images/snakeBodyDLRU.png",
+    "images/snakeBodyDRLU.png",
+    "images/snakeBodyULRD.png",
+    "images/snakeBodyURLD.png",
 
     "images/snakeBodyVERTU.png",
     "images/snakeBodyVERTD.png",
@@ -461,33 +461,39 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
 
     //Segments display logick
     for (int i = 1; i < vecSnake.size(); ++i) {
-        // xSTEP
+
         //TurnVertical
 		if(vecSnake[i-2].x == vecSnake[i-1].x 
         && vecSnake[i].y == vecSnake[i-1].y)
         {
+            //Up -> Left
             if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyRUUR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                // dc.DrawBitmap(imageLoader->snakeBodyRUUR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep);
                 continue;
             }
+            //Up -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyLUUL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                //dc.DrawBitmap(imageLoader->snakeBodyLUUL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
+            //Down -> Left
             else if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyRDDR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
+            //Down -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyLDDL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
         }
@@ -497,28 +503,32 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
 		if(vecSnake[i-2].y == vecSnake[i-1].y 
         && vecSnake[i].x == vecSnake[i-1].x)
         {
+            //Right -> Down
             if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyRUUR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
+            //Left -> Down
             else if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyLUUL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
+            //Right -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyRDDR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
+            //Left -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyLDDL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
         }

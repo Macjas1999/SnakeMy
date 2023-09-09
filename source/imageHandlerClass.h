@@ -13,10 +13,10 @@ class wxImagePanel : public wxPanel
 public:
     wxBitmap apple;
 
-    wxBitmap snakeBodyLDDL;
-    wxBitmap snakeBodyLUUL;
-    wxBitmap snakeBodyRDDR;
-    wxBitmap snakeBodyRUUR;
+    wxBitmap snakeBodyDLRU;
+    wxBitmap snakeBodyDRLU;
+    wxBitmap snakeBodyULRD;
+    wxBitmap snakeBodyURLD;
 
     wxBitmap snakeBodyVERTU;
     wxBitmap snakeBodyVERTD;
@@ -43,10 +43,10 @@ wxPanel(parent)
 {
     this->apple.LoadFile(list[0], format);
 
-    this->snakeBodyLDDL.LoadFile(list[1], format);
-    this->snakeBodyLUUL.LoadFile(list[2], format);
-    this->snakeBodyRDDR.LoadFile(list[3], format);
-    this->snakeBodyRUUR.LoadFile(list[4], format);
+    this->snakeBodyDLRU.LoadFile(list[1], format);
+    this->snakeBodyDRLU.LoadFile(list[2], format);
+    this->snakeBodyULRD.LoadFile(list[3], format);
+    this->snakeBodyURLD.LoadFile(list[4], format);
 
     this->snakeBodyVERTU.LoadFile(list[5], format);
     this->snakeBodyVERTD.LoadFile(list[6], format);

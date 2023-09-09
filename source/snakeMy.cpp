@@ -454,7 +454,7 @@ void Snake::PaintBcgr(wxDC& dc)
 
     dc.DrawRectangle(windowRect);
 }
-//TODO Display logick should be rewritten with subcalsses and functions not this if statement
+
 void Snake::drawSnake(wxBufferedPaintDC& dc)
 {
     //Snake Body
@@ -471,7 +471,6 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
                 dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
-                // dc.DrawBitmap(imageLoader->snakeBodyRUUR, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep);
                 continue;
             }
             //Up -> Right
@@ -479,7 +478,6 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
                 dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
-                //dc.DrawBitmap(imageLoader->snakeBodyLUUL, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Down -> Left

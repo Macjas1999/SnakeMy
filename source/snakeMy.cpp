@@ -457,6 +457,10 @@ void Snake::PaintBcgr(wxDC& dc)
 
 void Snake::drawSnake(wxBufferedPaintDC& dc)
 {
+    int xQuarterSwap = (xStep/4)*3;
+    int yQuarterSwap = (yStep/4)*3;
+    int xOneAndHalfSwap = (xStep/4)*6;
+    int yOneAndHalfSwap = (yStep/4)*6;
     //Snake Body
 
     //Segments display logick
@@ -470,28 +474,28 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Up -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Down -> Left
             else if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Down -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
         }
@@ -505,28 +509,28 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Left -> Down
             else if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Right -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
             //Left -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
                 continue;
             }
         }
@@ -547,13 +551,13 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
         else if(vecSnake[i].x == vecSnake[i-1].x 
         && vecSnake[i].y > vecSnake[i-1].y)
         { 
-            dc.DrawBitmap(imageLoader->snakeBodyVERTD, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyVERTD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
             continue;
         }
         else if(vecSnake[i].x == vecSnake[i-1].x 
         && vecSnake[i].y < vecSnake[i-1].y)
         { 
-            dc.DrawBitmap(imageLoader->snakeBodyVERTU, vecSnake[i-1].x-(xStep/4)*3, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyVERTU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
             continue;
         }
 
@@ -563,16 +567,16 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
     switch (snakeDir)
     {
     case UP:
-        dc.DrawBitmap(imageLoader->snakeHeadUP, vecSnake[0].x-(xStep/4)*3, vecSnake[0].y-(yStep/4)*6, false);
+        dc.DrawBitmap(imageLoader->snakeHeadUP, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yOneAndHalfSwap, false);
         break;
     case DOWN:
-        dc.DrawBitmap(imageLoader->snakeHeadDOWN, vecSnake[0].x-(xStep/4)*3, vecSnake[0].y-(yStep/4)*3, false);
+        dc.DrawBitmap(imageLoader->snakeHeadDOWN, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yQuarterSwap, false);
         break;
     case RIGHT:
-        dc.DrawBitmap(imageLoader->snakeHeadRIGHT, vecSnake[0].x-(xStep/4)*3, vecSnake[0].y-yStep, false);
+        dc.DrawBitmap(imageLoader->snakeHeadRIGHT, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yStep, false);
         break;
     case LEFT:
-        dc.DrawBitmap(imageLoader->snakeHeadLEFT, vecSnake[0].x-(xStep/4)*6, vecSnake[0].y-yStep, false);
+        dc.DrawBitmap(imageLoader->snakeHeadLEFT, vecSnake[0].x-xOneAndHalfSwap, vecSnake[0].y-yStep, false);
         break;
 
     default:

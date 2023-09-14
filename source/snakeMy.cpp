@@ -89,8 +89,9 @@ private:
     wxMenuItem *speedLvL9;
     wxMenuItem *speedLvL10;
 
-    int xStep;
-    int yStep;
+    int step;
+
+    int gridResolution;
 
     wxPoint gridStart;
     wxPoint gridEnd;
@@ -128,14 +129,15 @@ private:
     void moveSnake(movSnakeDir);
     void changeDirection(movSnakeDir);
     bool detectCollision(const wxPoint& object, const int from) const;
+    bool detectCollisionSized(const wxPoint& object, const int from, const int size) const;
     bool onLostGame();
     void aroundEdgeWrapping();
 
 };
 
 //Implementation of Snake class
-Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize(1100, 800)),
-                 zoneSize(1100, 800),
+Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize(1000, 1000)),
+                 zoneSize(1000, 1000),
                  score(0)
 {
     //Image part
@@ -198,19 +200,20 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
 
     // Grid settings
     gridStart = wxPoint(100, 100);
-    gridEnd = wxPoint(zoneSize.GetWidth() - 150, zoneSize.GetHeight() - 150);
+    gridEnd = wxPoint(zoneSize.GetWidth() - 100, zoneSize.GetHeight() - 100);
 
-    xStep = (gridEnd.x - gridStart.x) / 60; //25
-    yStep = (gridEnd.y - gridStart.y) / 60; //25
+    gridResolution = 100;
+
+    step = (gridEnd.x - gridStart.x) / gridResolution; //25
 
     // Snake spawn
-    vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 12));
-    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 12));
+    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
+    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
 
     timer = new wxTimer(this, 1);
-    speed = 160;
+    speed = 120;
     largeAppleTimer = new wxTimer(this, 2);
-    largeAppleTimerMultp = 50;
+    largeAppleTimerMultp = 140;
     largeAppleRespawn = largeAppleTimerMultp*speed*2; //+0000
     largeAppleCounter = false;
     largeAppleTimerActive = new wxTimer(this, 3);
@@ -253,12 +256,13 @@ void Snake::changeDirection(movSnakeDir snakeDir)
 {
     switch (snakeDir)
     {
-    case movSnakeDir::LEFT: { vecSnake[0].x = vecSnake[0].x - xStep; } break;
-	case movSnakeDir::RIGHT: { vecSnake[0].x = vecSnake[0].x + xStep; } break;
-	case movSnakeDir::UP: { vecSnake[0].y = vecSnake[0].y - yStep; } break;
-	case movSnakeDir::DOWN: { vecSnake[0].y = vecSnake[0].y + yStep; } break;
+    case movSnakeDir::LEFT: { vecSnake[0].x = vecSnake[0].x - step; } break;
+	case movSnakeDir::RIGHT: { vecSnake[0].x = vecSnake[0].x + step; } break;
+	case movSnakeDir::UP: { vecSnake[0].y = vecSnake[0].y - step; } break;
+	case movSnakeDir::DOWN: { vecSnake[0].y = vecSnake[0].y + step; } break;
     }
 }
+
 bool Snake::detectCollision(const wxPoint& object, const int from) const
 {
     for (int i = from; i < vecSnake.size(); ++i)
@@ -270,6 +274,23 @@ bool Snake::detectCollision(const wxPoint& object, const int from) const
     }
 	return false;
 }
+
+bool Snake::detectCollisionSized(const wxPoint& object, const int from, const int size) const
+{
+    for (int i = from; i < vecSnake.size(); ++i)
+    {
+        if (vecSnake[i].x == object.x && vecSnake[i].y == object.y
+        || vecSnake[i].x == object.x && (vecSnake[i].y-size) == object.y
+        || vecSnake[i].x == object.x && (vecSnake[i].y+size) == object.y
+        || (vecSnake[i].x-size) == object.x && vecSnake[i].y == object.y
+        || (vecSnake[i].x+size) == object.x && vecSnake[i].y == object.y)
+        {
+			return true;
+        }
+    }
+	return false;
+}
+
 bool Snake::onLostGame()
 {
     for (int i = 1; i < vecSnake.size(); ++i)
@@ -285,8 +306,8 @@ bool Snake::onLostGame()
             largeAppleTimer->Stop();
             this->score = 0;
             vecSnake.clear();
-            vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 10));
-            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 10));
+            vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 10));
+            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 10));
             this->snakeDir = movSnakeDir::RIGHT;
             Refresh();
             return true;
@@ -297,20 +318,20 @@ bool Snake::onLostGame()
 
 void Snake::aroundEdgeWrapping()
 {
-    if (vecSnake[0].x > gridStart.x + xStep * 60)
+    if (vecSnake[0].x > gridStart.x + step * gridResolution)
     {
         vecSnake[0].x = gridStart.x;
-    }else if (vecSnake[0].x < gridStart.x + xStep)
+    }else if (vecSnake[0].x < gridStart.x + step)
     {
-        vecSnake[0].x = gridStart.x + xStep * 60;
+        vecSnake[0].x = gridStart.x + step * gridResolution;
     }
 
-    if (vecSnake[0].y > gridStart.y + yStep * 60)
+    if (vecSnake[0].y > gridStart.y + step * gridResolution)
     {
         vecSnake[0].y = gridStart.y;
-    }else if (vecSnake[0].y < gridStart.y + yStep)
+    }else if (vecSnake[0].y < gridStart.y + step)
     {
-        vecSnake[0].y = gridStart.y + yStep * 60;
+        vecSnake[0].y = gridStart.y + step * gridResolution;
     }
 }
 
@@ -337,8 +358,8 @@ void Snake::moveSnake(movSnakeDir snakeDir)
 void Snake::nextApple(const wxPoint& pa, const wxPoint& pb)
 {
 	do {
-		apple.x = pa.x + random(1, 59) * xStep;
-		apple.y = pa.y + random(1, 59) * yStep;
+		apple.x = pa.x + random(1, gridResolution-1) * step;
+		apple.y = pa.y + random(1, gridResolution-1) * step;
 	} while (detectCollision(apple, 1));
 }
 
@@ -346,9 +367,9 @@ void Snake::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
 {
 
 	do {
-		largeApple.x = pa.x + random(1, 59) * xStep;
-		largeApple.y = pa.y + random(1, 59) * yStep;
-	} while (detectCollision(largeApple, 1));
+		largeApple.x = pa.x + random(1, gridResolution-1) * step;
+		largeApple.y = pa.y + random(1, gridResolution-1) * step;
+	} while (detectCollisionSized(largeApple, 1, step));
 
 }
 
@@ -367,7 +388,7 @@ void Snake::OnTimer(wxCommandEvent& event)
         ++score;
         
     }
-    if(detectCollision(largeApple, 1))
+    if(detectCollisionSized(largeApple, 1, step))
     {   
         nextLargeApple(gridStart, gridEnd);
         for (int i = 0; i < 5; i++)
@@ -457,11 +478,8 @@ void Snake::PaintBcgr(wxDC& dc)
 
 void Snake::drawSnake(wxBufferedPaintDC& dc)
 {
-    int xQuarterSwap = (xStep/4)*3;
-    int yQuarterSwap = (yStep/4)*3;
-    int xOneAndHalfSwap = (xStep/4)*6;
-    int yOneAndHalfSwap = (yStep/4)*6;
     //Snake Body
+    int stepSkewed = (step*6)/5;
 
     //Segments display logick
     for (int i = 1; i < vecSnake.size(); ++i) {
@@ -474,33 +492,33 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Up -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y < vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Down -> Left
             else if(vecSnake[i].x < vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Down -> Right
             else if(vecSnake[i].x > vecSnake[i-1].x 
             && vecSnake[i-1].y > vecSnake[i-2].y)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
         }
 
-        // ySTEP
+        // step
         //TurnHorizontal
 		if(vecSnake[i-2].y == vecSnake[i-1].y 
         && vecSnake[i].x == vecSnake[i-1].x)
@@ -509,28 +527,28 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
             if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyULRD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Left -> Down
             else if(vecSnake[i].y > vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyURLD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Right -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x > vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDLRU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
             //Left -> Up
             else if(vecSnake[i].y < vecSnake[i-1].y 
             && vecSnake[i-1].x < vecSnake[i-2].x)
             {
-                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+                dc.DrawBitmap(imageLoader->snakeBodyDRLU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
                 continue;
             }
         }
@@ -539,25 +557,25 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
         if(vecSnake[i].y == vecSnake[i-1].y 
         && vecSnake[i].x < vecSnake[i-1].x)
         {
-            dc.DrawBitmap(imageLoader->snakeBodyHORIL, vecSnake[i-1].x-xStep, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyHORIL, vecSnake[i-1].x-step, vecSnake[i-1].y-stepSkewed, false);
             continue;
         }
         else if(vecSnake[i].y == vecSnake[i-1].y 
         && vecSnake[i].x > vecSnake[i-1].x)
         {
-            dc.DrawBitmap(imageLoader->snakeBodyHORIR, vecSnake[i-1].x-xStep, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyHORIR, vecSnake[i-1].x-step, vecSnake[i-1].y-stepSkewed, false);
             continue;
         }
         else if(vecSnake[i].x == vecSnake[i-1].x 
         && vecSnake[i].y > vecSnake[i-1].y)
         { 
-            dc.DrawBitmap(imageLoader->snakeBodyVERTD, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyVERTD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-step, false);
             continue;
         }
         else if(vecSnake[i].x == vecSnake[i-1].x 
         && vecSnake[i].y < vecSnake[i-1].y)
         { 
-            dc.DrawBitmap(imageLoader->snakeBodyVERTU, vecSnake[i-1].x-xQuarterSwap, vecSnake[i-1].y-yStep, false);
+            dc.DrawBitmap(imageLoader->snakeBodyVERTU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-step, false);
             continue;
         }
 
@@ -567,16 +585,16 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
     switch (snakeDir)
     {
     case UP:
-        dc.DrawBitmap(imageLoader->snakeHeadUP, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yOneAndHalfSwap, false);
+        dc.DrawBitmap(imageLoader->snakeHeadUP, vecSnake[0].x-stepSkewed, vecSnake[0].y-step, false);
         break;
     case DOWN:
-        dc.DrawBitmap(imageLoader->snakeHeadDOWN, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yQuarterSwap, false);
+        dc.DrawBitmap(imageLoader->snakeHeadDOWN, vecSnake[0].x-stepSkewed, vecSnake[0].y-step, false);
         break;
     case RIGHT:
-        dc.DrawBitmap(imageLoader->snakeHeadRIGHT, vecSnake[0].x-xQuarterSwap, vecSnake[0].y-yStep, false);
+        dc.DrawBitmap(imageLoader->snakeHeadRIGHT, vecSnake[0].x-step, vecSnake[0].y-stepSkewed, false);
         break;
     case LEFT:
-        dc.DrawBitmap(imageLoader->snakeHeadLEFT, vecSnake[0].x-xOneAndHalfSwap, vecSnake[0].y-yStep, false);
+        dc.DrawBitmap(imageLoader->snakeHeadLEFT, vecSnake[0].x-step, vecSnake[0].y-stepSkewed, false);
         break;
 
     default:
@@ -602,9 +620,9 @@ void Snake::drawGrid(wxBufferedPaintDC& dc, const wxPoint& pa, const wxPoint& pb
 	dc.SetBrush(*wxWHITE_BRUSH);
 	dc.SetPen(wxPen(*wxColor(90, 242, 232), 1, wxPENSTYLE_DOT)); //*wxLIGHT_GREY
 
-	for (int i = pa.y; i < pb.y; i += yStep)
+	for (int i = pa.y; i < pb.y; i += step)
 		dc.DrawLine(wxPoint(pa.x, i), wxPoint(pb.x, i)); //90, 242, 232
-	for (int i = pa.x; i < pb.x; i += xStep)
+	for (int i = pa.x; i < pb.x; i += step)
 		dc.DrawLine(wxPoint(i, pa.y), wxPoint(i, pb.y));
 }
 
@@ -618,7 +636,7 @@ void Snake::OnPaint(wxPaintEvent& event)
 	dc.DrawRectangle(wxPoint(0, 0), zoneSize);
 	dc.SetBrush(*wxWHITE_BRUSH);
 	dc.SetPen(wxPen(*wxBLACK, 4, wxPENSTYLE_SOLID));
-	dc.DrawRectangle(wxPoint(100, 100), wxSize(zoneSize.GetWidth() - 250, zoneSize.GetHeight() - 250));
+	dc.DrawRectangle(wxPoint(100, 100), wxSize(zoneSize.GetWidth() - 200, zoneSize.GetHeight() - 200));
 
 	drawGrid(dc, gridStart, gridEnd);
 	if (!finish && !pause) {
@@ -650,78 +668,78 @@ void Snake::OnReset(wxCommandEvent& event)
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
     score = 0;
     vecSnake.clear();
-    vecSnake.push_back(wxPoint(gridStart.x + xStep, gridStart.y + yStep * 12));
-    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + yStep * 12));
+    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
+    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
     snakeDir = movSnakeDir::RIGHT;
 }
 
 void Snake::OnSpeedChangeLVL1(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 220;
+    this->speed = 180;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL2(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 200;
+    this->speed = 160;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL3(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 180;
+    this->speed = 140;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL4(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 160;
+    this->speed = 120;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL5(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 140;
+    this->speed = 100;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL6(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 120;
+    this->speed = 80;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL7(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 100;
+    this->speed = 60;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL8(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 80;
+    this->speed = 40;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL9(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 60;
+    this->speed = 20;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 
 void Snake::OnSpeedChangeLVL10(wxCommandEvent& event)
 {
     if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 40;
+    this->speed = 10;
     this->largeAppleRespawn = largeAppleTimerMultp*speed;
 }
 

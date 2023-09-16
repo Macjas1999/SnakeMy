@@ -30,6 +30,11 @@ public:
 
     wxBitmap largeApple;
 
+    wxBitmap snakeBodyENDD;
+    wxBitmap snakeBodyENDU;
+    wxBitmap snakeBodyENDL;
+    wxBitmap snakeBodyENDR;
+
     wxBitmapType format;    
 
     wxImagePanel(wxFrame* parent, wxString* list, wxBitmapType format);
@@ -59,4 +64,10 @@ wxPanel(parent)
     this->snakeHeadRIGHT.LoadFile(list[12], format);
 
     this->largeApple.LoadFile(list[13], format);
+
+    this->snakeBodyENDD.LoadFile(list[14], format);
+    this->snakeBodyENDU.LoadFile(list[15], format);
+    this->snakeBodyENDL.LoadFile(list[16], format);
+    this->snakeBodyENDR.LoadFile(list[17], format);
+
 }

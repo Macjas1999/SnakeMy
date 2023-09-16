@@ -162,8 +162,12 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     "images/snakeHeadRIGHT.png",
 
     "images/largeAppleImg.png"
-    };
 
+    "images/snakeBodyENDD.png"
+    "images/snakeBodyENDU.png"
+    "images/snakeBodyENDL.png"
+    "images/snakeBodyENDR.png"
+    };
     imageLoader = new wxImagePanel(this, list, wxBITMAP_TYPE_PNG);
 
     menuBar = new wxMenuBar;
@@ -204,7 +208,7 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
 
     gridResolution = 100;
 
-    step = (gridEnd.x - gridStart.x) / gridResolution; //25
+    step = (gridEnd.x - gridStart.x) / gridResolution;
 
     // Snake spawn
     vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
@@ -214,7 +218,7 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     speed = 120;
     largeAppleTimer = new wxTimer(this, 2);
     largeAppleTimerMultp = 140;
-    largeAppleRespawn = largeAppleTimerMultp*speed*2; //+0000
+    largeAppleRespawn = largeAppleTimerMultp*speed*2;
     largeAppleCounter = false;
     largeAppleTimerActive = new wxTimer(this, 3);
     largeAppleTimerActiveMultp = largeAppleTimerMultp*speed;
@@ -430,9 +434,17 @@ void Snake::OnKeyDown(wxKeyEvent& event)
     switch (key)
     {
 		case 's': case 'S':
-            if (!start) { start = true; pause = false; timer->Start(speed); largeAppleTimer->Start(largeAppleRespawn);} return;
+            if (!start) 
+            {
+                start = true; pause = false; timer->Start(speed); largeAppleTimer->Start(largeAppleRespawn);
+            }
+            return;
 		case 'p': case 'P': 
-            if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();} return;
+            if (!pause)
+            {
+                pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();
+            }
+            return;
 		case WXK_LEFT:
             if (snakeDir != RIGHT)
             {

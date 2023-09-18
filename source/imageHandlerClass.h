@@ -70,4 +70,4 @@ wxPanel(parent)
     this->snakeBodyENDL.LoadFile(list[16], format);
     this->snakeBodyENDR.LoadFile(list[17], format);
 
-}
+};

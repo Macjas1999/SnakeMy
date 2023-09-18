@@ -161,11 +161,11 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     "images/snakeHeadLEFT.png",
     "images/snakeHeadRIGHT.png",
 
-    "images/largeAppleImg.png"
+    "images/largeAppleImg.png",
 
-    "images/snakeBodyENDD.png"
-    "images/snakeBodyENDU.png"
-    "images/snakeBodyENDL.png"
+    "images/snakeBodyENDD.png",
+    "images/snakeBodyENDU.png",
+    "images/snakeBodyENDL.png",
     "images/snakeBodyENDR.png"
     };
     imageLoader = new wxImagePanel(this, list, wxBITMAP_TYPE_PNG);
@@ -496,6 +496,33 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
     //Segments display logick
     for (int i = 1; i < vecSnake.size(); ++i) {
 
+        //Insert logick for displaying the last part 
+        if (i == (vecSnake.size()-1))
+        {
+            if (vecSnake[i-1].x > vecSnake[i].x)
+            {
+                dc.DrawBitmap(imageLoader->snakeBodyENDR, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
+                continue;
+            }
+            else if (vecSnake[i-1].x < vecSnake[i].x)
+            {
+                dc.DrawBitmap(imageLoader->snakeBodyENDL, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
+                continue;
+            }
+
+            if (vecSnake[i-1].y > vecSnake[i].y)
+            {
+                dc.DrawBitmap(imageLoader->snakeBodyENDD, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
+                continue;
+            }
+            else if (vecSnake[i-1].y < vecSnake[i].y)
+            {
+                dc.DrawBitmap(imageLoader->snakeBodyENDU, vecSnake[i-1].x-stepSkewed, vecSnake[i-1].y-stepSkewed, false);
+                continue;
+            }
+        }
+        
+        
         //TurnVertical
 		if(vecSnake[i-2].x == vecSnake[i-1].x 
         && vecSnake[i].y == vecSnake[i-1].y)

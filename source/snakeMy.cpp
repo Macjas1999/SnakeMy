@@ -35,6 +35,7 @@ public:
 protected:
     wxBitmap image;
     wxButton* startButton;
+    wxStaticText* instruction;
 
     void OnStartButtonClick(wxCommandEvent& event);
 };
@@ -61,6 +62,12 @@ Startup::Startup() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wx
         buttonFont.SetPointSize(16);
         startButton->SetFont(buttonFont);
         vbox->Add(startButton, 0, wxALIGN_CENTER | wxALL, 10);
+
+        instruction = new wxStaticText(this, wxID_ANY, "To unpause after starting game press \'S\'");
+	    wxFont instFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false);
+	    instruction->SetFont(instFont);
+        vbox->Add(instruction, 0, wxALIGN_CENTER | wxALL, 10);
+
         vbox->AddStretchSpacer(); // This pushes menu up
 
         startButton->Bind(wxEVT_BUTTON, &Startup::OnStartButtonClick, this);

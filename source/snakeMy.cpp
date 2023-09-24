@@ -34,44 +34,17 @@ int random(int min, int max)
 {
 	return min + rand() % (max - min + 1);
 }
-
 //Main
-class Snake : public wxFrame
+
+class GameM : public wxFrame
 {
 public:
-    enum movSnakeDir
-    {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    };
-    Snake();
+    GameM();
 
 protected:
-    void OnPaint(wxPaintEvent &event);
-    void PaintBcgr(wxDC &dc);
-    void OnKeyDown(wxKeyEvent &);
-    void OnTimer(wxCommandEvent &);
-    void OnDrawLargeApple(wxCommandEvent &);
-    void OnActiveLargeApple(wxCommandEvent &);
-    
-    void OnQuit(wxCommandEvent &);
-    void OnReset(wxCommandEvent &);
 
-    void OnSpeedChangeLVL1(wxCommandEvent &);
-    void OnSpeedChangeLVL2(wxCommandEvent &);
-    void OnSpeedChangeLVL3(wxCommandEvent &);
-    void OnSpeedChangeLVL4(wxCommandEvent &);
-    void OnSpeedChangeLVL5(wxCommandEvent &);
-    void OnSpeedChangeLVL6(wxCommandEvent &);
-    void OnSpeedChangeLVL7(wxCommandEvent &);
-    void OnSpeedChangeLVL8(wxCommandEvent &);
-    void OnSpeedChangeLVL9(wxCommandEvent &);
-    void OnSpeedChangeLVL10(wxCommandEvent &);
-
-private:
     wxSize zoneSize;
+    int score;
 
     wxMenu *menu;
     wxMenuBar *menuBar;
@@ -95,7 +68,6 @@ private:
 
     wxPoint gridStart;
     wxPoint gridEnd;
-    vector<wxPoint> vecSnake;
     wxPoint apple;
     wxPoint largeApple;
 
@@ -110,66 +82,46 @@ private:
     wxTimer *largeAppleTimerActive;
     int largeAppleTimerActiveMultp;
 
+    //movSnakeDir snakeDir;
     movSnakeDir snakeDir;
-    int score;
+
 
     bool start;
     bool pause;
     bool finish;
 
-    wxString *list;
-    wxImagePanel *imageLoader;    
+    void OnPaint(wxPaintEvent &event);
+    void PaintBcgr(wxDC &dc);
+    void OnTimer(wxCommandEvent &);
+    void OnDrawLargeApple(wxCommandEvent &);
+    void OnActiveLargeApple(wxCommandEvent &);
+    
+    void OnQuit(wxCommandEvent &);
+    void OnReset(wxCommandEvent &);
+
+    void OnSpeedChangeLVL1(wxCommandEvent &);
+    void OnSpeedChangeLVL2(wxCommandEvent &);
+    void OnSpeedChangeLVL3(wxCommandEvent &);
+    void OnSpeedChangeLVL4(wxCommandEvent &);
+    void OnSpeedChangeLVL5(wxCommandEvent &);
+    void OnSpeedChangeLVL6(wxCommandEvent &);
+    void OnSpeedChangeLVL7(wxCommandEvent &);
+    void OnSpeedChangeLVL8(wxCommandEvent &);
+    void OnSpeedChangeLVL9(wxCommandEvent &);
+    void OnSpeedChangeLVL10(wxCommandEvent &);
 
     void drawGrid(wxBufferedPaintDC &, const wxPoint &, const wxPoint &);
-    void drawSnake(wxBufferedPaintDC &);
     void nextApple(const wxPoint &, const wxPoint &);
     void drawApple(wxBufferedPaintDC &);
     void nextLargeApple(const wxPoint &, const wxPoint &);
     void drawLargeApple(wxBufferedPaintDC &);
-    void moveSnake(movSnakeDir);
-    void changeDirection(movSnakeDir);
-    bool detectCollision(const wxPoint& object, const int from) const;
-    bool detectCollisionSized(const wxPoint& object, const int from, const int size) const;
     bool onLostGame();
-    void aroundEdgeWrapping();
-
 };
 
-//Implementation of Snake class
-Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize(1000, 1000)),
+GameM::GameM() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize(1000, 1000)),
                  zoneSize(1000, 1000),
                  score(0)
 {
-    //Image part
-    wxImage::AddHandler(new wxPNGHandler);
-
-    list = new wxString[]
-    {
-    "images/appleImg.png", 
-    "images/snakeBodyDLRU.png",
-    "images/snakeBodyDRLU.png",
-    "images/snakeBodyULRD.png",
-    "images/snakeBodyURLD.png",
-
-    "images/snakeBodyVERTU.png",
-    "images/snakeBodyVERTD.png",
-    "images/snakeBodyHORIR.png",
-    "images/snakeBodyHORIL.png",
-
-    "images/snakeHeadUP.png",
-    "images/snakeHeadDOWN.png",
-    "images/snakeHeadLEFT.png",
-    "images/snakeHeadRIGHT.png",
-
-    "images/largeAppleImg.png",
-
-    "images/snakeBodyENDD.png",
-    "images/snakeBodyENDU.png",
-    "images/snakeBodyENDL.png",
-    "images/snakeBodyENDR.png"
-    };
-    imageLoader = new wxImagePanel(this, list, wxBITMAP_TYPE_PNG);
-
     menuBar = new wxMenuBar;
     menu = new wxMenu;
     speedChoice = new wxMenu;
@@ -210,10 +162,6 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
 
     step = (gridEnd.x - gridStart.x) / gridResolution;
 
-    // Snake spawn
-    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
-    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
-
     timer = new wxTimer(this, 1);
     speed = 120;
     largeAppleTimer = new wxTimer(this, 2);
@@ -227,28 +175,381 @@ Snake::Snake() : wxFrame(NULL, wxID_ANY, wxT("Snake"), wxDefaultPosition, wxSize
     pause = false;
     finish = false;
 
-    snakeDir = movSnakeDir::RIGHT;
-
     nextApple(gridStart, gridEnd);
     nextLargeApple(gridStart, gridEnd);
 
-    Connect(wxEVT_PAINT, wxPaintEventHandler(Snake::OnPaint));
-    Connect(wxID_EXIT, wxEVT_MENU, wxCommandEventHandler(Snake::OnQuit));
-    Connect(6, wxEVT_MENU, wxCommandEventHandler(Snake::OnReset));
+    Connect(wxEVT_PAINT, wxPaintEventHandler(GameM::OnPaint));
+    Connect(wxID_EXIT, wxEVT_MENU, wxCommandEventHandler(GameM::OnQuit));
+    Connect(6, wxEVT_MENU, wxCommandEventHandler(GameM::OnReset));
 
-    Connect(11, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL1));
-    Connect(12, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL2));
-    Connect(13, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL3));
-    Connect(14, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL4));
-    Connect(15, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL5));
-    Connect(16, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL6));
-    Connect(17, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL7));
-    Connect(18, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL8));
-    Connect(19, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL9));
-    Connect(20, wxEVT_MENU, wxCommandEventHandler(Snake::OnSpeedChangeLVL10));
-    Connect(1, wxEVT_TIMER, wxCommandEventHandler(Snake::OnTimer));
-    Connect(2, wxEVT_TIMER, wxCommandEventHandler(Snake::OnDrawLargeApple));
-    Connect(3, wxEVT_TIMER, wxCommandEventHandler(Snake::OnActiveLargeApple));
+    Connect(11, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL1));
+    Connect(12, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL2));
+    Connect(13, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL3));
+    Connect(14, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL4));
+    Connect(15, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL5));
+    Connect(16, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL6));
+    Connect(17, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL7));
+    Connect(18, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL8));
+    Connect(19, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL9));
+    Connect(20, wxEVT_MENU, wxCommandEventHandler(GameM::OnSpeedChangeLVL10));
+    Connect(1, wxEVT_TIMER, wxCommandEventHandler(GameM::OnTimer));
+    Connect(2, wxEVT_TIMER, wxCommandEventHandler(GameM::OnDrawLargeApple));
+    Connect(3, wxEVT_TIMER, wxCommandEventHandler(GameM::OnActiveLargeApple));
+}
+//Timers
+void GameM::OnTimer(wxCommandEvent& event)
+{
+
+    if (!pause && !finish)
+    {
+        moveSnake(snakeDir);
+    }
+    if (detectCollision(apple, 1))
+    {
+        vecSnake.push_back(vecSnake[vecSnake.size() - 1]);
+        nextApple(gridStart, gridEnd);
+        ++score;
+        
+    }
+    if(detectCollisionSized(largeApple, 1, step))
+    {   
+        nextLargeApple(gridStart, gridEnd);
+        for (int i = 0; i < 5; i++)
+        {
+            vecSnake.push_back(vecSnake[vecSnake.size() - 1]);
+            largeApple = wxPoint(0,0);
+        }
+        score += 5;
+        largeAppleTimer->Stop();
+        largeAppleTimerActive->Start(largeAppleTimerActiveMultp);
+    }
+    Refresh();
+}
+
+void GameM::OnDrawLargeApple(wxCommandEvent& event)
+{   
+    if (largeAppleCounter)
+    {
+        largeAppleCounter = false;
+    }
+    else if(!largeAppleCounter)
+    {
+        largeAppleCounter = true;
+    }
+    nextLargeApple(gridStart, gridEnd);
+    Refresh();
+}
+
+void GameM::OnActiveLargeApple(wxCommandEvent& event){
+    largeAppleCounter = false;
+    largeAppleTimerActive->Stop();
+    largeAppleTimer->Start(largeAppleRespawn);
+}
+
+void GameM::PaintBcgr(wxDC& dc)
+{
+    wxColour backgroundColour = GetBackgroundColour();
+    if (!backgroundColour.IsOk())
+    {
+        backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+    }
+    dc.SetBrush(wxBrush(backgroundColour));
+    dc.SetPen(wxPen(backgroundColour, 1));
+    wxRect windowRect(wxPoint(0, 0), GetClientSize());
+
+    dc.DrawRectangle(windowRect);
+}
+
+//Apple
+void GameM::drawApple(wxBufferedPaintDC& dc)
+{
+    dc.DrawBitmap(imageLoader->apple, apple.x - 6, apple.y - 6, false);
+}
+
+//Large apple
+void GameM::drawLargeApple(wxBufferedPaintDC& dc)
+{
+    dc.DrawBitmap(imageLoader->largeApple, largeApple.x - 10, largeApple.y - 10, false);   
+}
+
+//Grid
+void GameM::drawGrid(wxBufferedPaintDC& dc, const wxPoint& pa, const wxPoint& pb)
+{ 
+	dc.SetBrush(*wxWHITE_BRUSH);
+	dc.SetPen(wxPen(*wxColor(90, 242, 232), 1, wxPENSTYLE_DOT)); //*wxLIGHT_GREY
+
+	for (int i = pa.y; i < pb.y; i += step)
+		dc.DrawLine(wxPoint(pa.x, i), wxPoint(pb.x, i)); //90, 242, 232
+	for (int i = pa.x; i < pb.x; i += step)
+		dc.DrawLine(wxPoint(i, pa.y), wxPoint(i, pb.y));
+}
+
+//Main paint event
+void GameM::OnPaint(wxPaintEvent& event)
+{
+	wxBufferedPaintDC dc(this);
+
+	dc.SetBrush(*wxBLACK_BRUSH);
+	dc.SetPen(wxPen(*wxBLUE, 4, wxPENSTYLE_SOLID));
+	dc.DrawRectangle(wxPoint(0, 0), zoneSize);
+	dc.SetBrush(*wxWHITE_BRUSH);
+	dc.SetPen(wxPen(*wxBLACK, 4, wxPENSTYLE_SOLID));
+	dc.DrawRectangle(wxPoint(100, 100), wxSize(zoneSize.GetWidth() - 200, zoneSize.GetHeight() - 200));
+
+	drawGrid(dc, gridStart, gridEnd);
+	if (!finish && !pause) {
+		drawApple(dc);
+		drawSnake(dc);     
+	}
+    if (largeAppleCounter)
+    {
+        drawLargeApple(dc);
+    }
+
+	dc.SetBrush(*wxWHITE_BRUSH);
+	dc.SetPen(wxPen(*wxColour(50, 143, 168), 4, wxPENSTYLE_SOLID));
+	dc.DrawRectangle(wxPoint(10, 10), wxSize(120, 80));
+
+	wxString x;
+	x << score;
+	wxFont font(40, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false);
+	dc.SetFont(font);
+	dc.SetTextForeground(wxColour(50, 143, 168));
+	dc.DrawText(x, wxPoint(10, 10));
+
+	dc.SetPen(wxNullPen); 
+}
+
+//Gameplay controll functions
+void GameM::OnReset(wxCommandEvent& event)
+{ 
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    score = 0;
+    vecSnake.clear();
+    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
+    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
+    snakeDir = movSnakeDir::RIGHT;
+}
+
+void GameM::OnSpeedChangeLVL1(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 180;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL2(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 160;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL3(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 140;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL4(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 120;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL5(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 100;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL6(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 80;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL7(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 60;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL8(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 40;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL9(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 20;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnSpeedChangeLVL10(wxCommandEvent& event)
+{
+    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
+    this->speed = 10;
+    this->largeAppleRespawn = largeAppleTimerMultp*speed;
+}
+
+void GameM::OnQuit(wxCommandEvent& event)
+{
+	Close(true);
+}
+
+
+bool GameM::onLostGame()
+{
+    for (int i = 1; i < vecSnake.size(); ++i)
+    {
+        if (detectCollision(vecSnake[0], 1))
+        {
+            wxMessageBox(wxT("LOST GAME\n To restart after closing this window press \'S\'"), wxT("END"));
+
+            this->pause = true;
+            this->start = false;
+            timer->Stop();
+            nextLargeApple(this->gridStart, this->gridEnd);
+            largeAppleTimer->Stop();
+            this->score = 0;
+            vecSnake.clear();
+            vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 10));
+            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 10));
+            this->snakeDir = movSnakeDir::RIGHT;
+            Refresh();
+            return true;
+        }
+    }
+    return false;
+}
+
+void GameM::nextApple(const wxPoint& pa, const wxPoint& pb)
+{
+	do {
+		apple.x = pa.x + random(1, gridResolution-1) * step;
+		apple.y = pa.y + random(1, gridResolution-1) * step;
+	} while (detectCollision(apple, 1));
+}
+
+void GameM::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
+{
+
+	do {
+		largeApple.x = pa.x + random(1, gridResolution-1) * step;
+		largeApple.y = pa.y + random(1, gridResolution-1) * step;
+	} while (detectCollisionSized(largeApple, 1, step));
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Snake
+class Snake : public GameM
+{
+public:
+    enum movSnakeDir
+    {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    };
+    Snake();
+
+protected:
+    void OnKeyDown(wxKeyEvent &);
+
+private:
+
+    vector<wxPoint> vecSnake;
+    movSnakeDir snakeDir;
+    wxString *list;
+    wxImagePanel *imageLoader;    
+
+    void drawSnake(wxBufferedPaintDC &);
+    void moveSnake(movSnakeDir);
+    void changeDirection(movSnakeDir);
+    bool detectCollision(const wxPoint& object, const int from) const;
+    bool detectCollisionSized(const wxPoint& object, const int from, const int size) const;
+    void aroundEdgeWrapping();
+
+};
+
+//Implementation of Snake class
+Snake::Snake()
+{
+    //Image part
+    wxImage::AddHandler(new wxPNGHandler);
+
+    list = new wxString[]
+    {
+    "images/appleImg.png", 
+    "images/snakeBodyDLRU.png",
+    "images/snakeBodyDRLU.png",
+    "images/snakeBodyULRD.png",
+    "images/snakeBodyURLD.png",
+
+    "images/snakeBodyVERTU.png",
+    "images/snakeBodyVERTD.png",
+    "images/snakeBodyHORIR.png",
+    "images/snakeBodyHORIL.png",
+
+    "images/snakeHeadUP.png",
+    "images/snakeHeadDOWN.png",
+    "images/snakeHeadLEFT.png",
+    "images/snakeHeadRIGHT.png",
+
+    "images/largeAppleImg.png",
+
+    "images/snakeBodyENDD.png",
+    "images/snakeBodyENDU.png",
+    "images/snakeBodyENDL.png",
+    "images/snakeBodyENDR.png"
+    };
+    imageLoader = new wxImagePanel(this, list, wxBITMAP_TYPE_PNG);
+
+    // Snake spawn
+    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
+    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
+
+    snakeDir = movSnakeDir::RIGHT;
 
     wxPanel *sPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
     sPanel->Bind(wxEVT_CHAR_HOOK, &Snake::OnKeyDown, this);
@@ -295,31 +596,6 @@ bool Snake::detectCollisionSized(const wxPoint& object, const int from, const in
 	return false;
 }
 
-bool Snake::onLostGame()
-{
-    for (int i = 1; i < vecSnake.size(); ++i)
-    {
-        if (detectCollision(vecSnake[0], 1))
-        {
-            wxMessageBox(wxT("LOST GAME\n To restart after closing this window press \'S\'"), wxT("END"));
-
-            this->pause = true;
-            this->start = false;
-            timer->Stop();
-            nextLargeApple(this->gridStart, this->gridEnd);
-            largeAppleTimer->Stop();
-            this->score = 0;
-            vecSnake.clear();
-            vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 10));
-            vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 10));
-            this->snakeDir = movSnakeDir::RIGHT;
-            Refresh();
-            return true;
-        }
-    }
-    return false;
-}
-
 void Snake::aroundEdgeWrapping()
 {
     if (vecSnake[0].x > gridStart.x + step * gridResolution)
@@ -357,74 +633,6 @@ void Snake::moveSnake(movSnakeDir snakeDir)
 
     aroundEdgeWrapping();
 
-}
-
-void Snake::nextApple(const wxPoint& pa, const wxPoint& pb)
-{
-	do {
-		apple.x = pa.x + random(1, gridResolution-1) * step;
-		apple.y = pa.y + random(1, gridResolution-1) * step;
-	} while (detectCollision(apple, 1));
-}
-
-void Snake::nextLargeApple(const wxPoint& pa, const wxPoint& pb)
-{
-
-	do {
-		largeApple.x = pa.x + random(1, gridResolution-1) * step;
-		largeApple.y = pa.y + random(1, gridResolution-1) * step;
-	} while (detectCollisionSized(largeApple, 1, step));
-
-}
-
-//Timers
-void Snake::OnTimer(wxCommandEvent& event)
-{
-
-    if (!pause && !finish)
-    {
-        moveSnake(snakeDir);
-    }
-    if (detectCollision(apple, 1))
-    {
-        vecSnake.push_back(vecSnake[vecSnake.size() - 1]);
-        nextApple(gridStart, gridEnd);
-        ++score;
-        
-    }
-    if(detectCollisionSized(largeApple, 1, step))
-    {   
-        nextLargeApple(gridStart, gridEnd);
-        for (int i = 0; i < 5; i++)
-        {
-            vecSnake.push_back(vecSnake[vecSnake.size() - 1]);
-            largeApple = wxPoint(0,0);
-        }
-        score += 5;
-        largeAppleTimer->Stop();
-        largeAppleTimerActive->Start(largeAppleTimerActiveMultp);
-    }
-    Refresh();
-}
-
-void Snake::OnDrawLargeApple(wxCommandEvent& event)
-{   
-    if (largeAppleCounter)
-    {
-        largeAppleCounter = false;
-    }
-    else if(!largeAppleCounter)
-    {
-        largeAppleCounter = true;
-    }
-    nextLargeApple(gridStart, gridEnd);
-    Refresh();
-}
-
-void Snake::OnActiveLargeApple(wxCommandEvent& event){
-    largeAppleCounter = false;
-    largeAppleTimerActive->Stop();
-    largeAppleTimer->Start(largeAppleRespawn);
 }
 
 //Handling keyboard input
@@ -472,20 +680,6 @@ void Snake::OnKeyDown(wxKeyEvent& event)
         default:
             event.Skip();
     }
-}
-
-void Snake::PaintBcgr(wxDC& dc)
-{
-    wxColour backgroundColour = GetBackgroundColour();
-    if (!backgroundColour.IsOk())
-    {
-        backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
-    }
-    dc.SetBrush(wxBrush(backgroundColour));
-    dc.SetPen(wxPen(backgroundColour, 1));
-    wxRect windowRect(wxPoint(0, 0), GetClientSize());
-
-    dc.DrawRectangle(windowRect);
 }
 
 void Snake::drawSnake(wxBufferedPaintDC& dc)
@@ -641,152 +835,6 @@ void Snake::drawSnake(wxBufferedPaintDC& dc)
     }
 }
 
-//Apple
-void Snake::drawApple(wxBufferedPaintDC& dc)
-{
-    dc.DrawBitmap(imageLoader->apple, apple.x - 6, apple.y - 6, false);
-}
-
-//Large apple
-void Snake::drawLargeApple(wxBufferedPaintDC& dc)
-{
-    dc.DrawBitmap(imageLoader->largeApple, largeApple.x - 10, largeApple.y - 10, false);   
-}
-
-//Grid
-void Snake::drawGrid(wxBufferedPaintDC& dc, const wxPoint& pa, const wxPoint& pb)
-{ 
-	dc.SetBrush(*wxWHITE_BRUSH);
-	dc.SetPen(wxPen(*wxColor(90, 242, 232), 1, wxPENSTYLE_DOT)); //*wxLIGHT_GREY
-
-	for (int i = pa.y; i < pb.y; i += step)
-		dc.DrawLine(wxPoint(pa.x, i), wxPoint(pb.x, i)); //90, 242, 232
-	for (int i = pa.x; i < pb.x; i += step)
-		dc.DrawLine(wxPoint(i, pa.y), wxPoint(i, pb.y));
-}
-
-//Main paint event
-void Snake::OnPaint(wxPaintEvent& event)
-{
-	wxBufferedPaintDC dc(this);
-
-	dc.SetBrush(*wxBLACK_BRUSH);
-	dc.SetPen(wxPen(*wxBLUE, 4, wxPENSTYLE_SOLID));
-	dc.DrawRectangle(wxPoint(0, 0), zoneSize);
-	dc.SetBrush(*wxWHITE_BRUSH);
-	dc.SetPen(wxPen(*wxBLACK, 4, wxPENSTYLE_SOLID));
-	dc.DrawRectangle(wxPoint(100, 100), wxSize(zoneSize.GetWidth() - 200, zoneSize.GetHeight() - 200));
-
-	drawGrid(dc, gridStart, gridEnd);
-	if (!finish && !pause) {
-		drawApple(dc);
-		drawSnake(dc);     
-	}
-    if (largeAppleCounter)
-    {
-        drawLargeApple(dc);
-    }
-
-	dc.SetBrush(*wxWHITE_BRUSH);
-	dc.SetPen(wxPen(*wxColour(50, 143, 168), 4, wxPENSTYLE_SOLID));
-	dc.DrawRectangle(wxPoint(10, 10), wxSize(120, 80));
-
-	wxString x;
-	x << score;
-	wxFont font(40, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false);
-	dc.SetFont(font);
-	dc.SetTextForeground(wxColour(50, 143, 168));
-	dc.DrawText(x, wxPoint(10, 10));
-
-	dc.SetPen(wxNullPen); 
-}
-
-//Gameplay controll functions
-void Snake::OnReset(wxCommandEvent& event)
-{ 
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    score = 0;
-    vecSnake.clear();
-    vecSnake.push_back(wxPoint(gridStart.x + step, gridStart.y + step * 12));
-    vecSnake.push_back(wxPoint(gridStart.x, gridStart.y + step * 12));
-    snakeDir = movSnakeDir::RIGHT;
-}
-
-void Snake::OnSpeedChangeLVL1(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 180;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL2(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 160;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL3(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 140;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL4(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 120;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL5(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 100;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL6(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 80;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL7(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 60;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL8(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 40;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL9(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 20;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnSpeedChangeLVL10(wxCommandEvent& event)
-{
-    if (!pause) { pause = true; start = false; timer->Stop(); largeAppleTimer->Stop();}
-    this->speed = 10;
-    this->largeAppleRespawn = largeAppleTimerMultp*speed;
-}
-
-void Snake::OnQuit(wxCommandEvent& event)
-{
-	Close(true);
-}
-
 ///////////////////////////// 
 // MyApp
 /////////////////////////////
@@ -802,9 +850,13 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
 	srand(time(NULL));
-	Snake* game = new Snake();
+
+    Snake* game = new Snake();
 	game->Centre();
 	game->Show(true);
+	// GameM* game = new GameM();
+	// game->Centre();
+	// game->Show(true);
 
 	return true;
 }

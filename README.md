@@ -1,9 +1,11 @@
 # SnakeMy
 Game of snake in **c++**
+![alt text](https://github.com/Macjas1999/SnakeMy/blob/main/Screenshots/Screenshot0.png)
+![alt text](https://github.com/Macjas1999/SnakeMy/blob/main/Screenshots/Screenshot1.png)
+![alt text](https://github.com/Macjas1999/SnakeMy/blob/main/Screenshots/Screenshot2.png)
 
 * GUI library is wxWidgets.
 * I have drawn snake segments and apples myself.
-
 
 Building the game requires wxWidgets library insatalled. Compiling the game should be done from the “SnakeMy” directory, for example using:<br>
 **g++ -Isource source/snakeMy.cpp `wx-config --cxxflags --libs std` -o snakeMy.exe**<br>

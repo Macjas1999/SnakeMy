@@ -1,12 +1,12 @@
-#include <wx/wx.h>
-#include <wx/sizer.h>
-#include <wx/spinctrl.h>
-#include <wx/wfstream.h>
-#include <wx/dcbuffer.h>
-#include <wx/dc.h>
-#include <wx/event.h>
-#include <wx/timer.h>
-#include <wx/menu.h>
+// #include <wx/wx.h>
+// #include <wx/sizer.h>
+// #include <wx/spinctrl.h>
+// #include <wx/wfstream.h>
+// #include <wx/dcbuffer.h>
+// #include <wx/dc.h>
+// #include <wx/event.h>
+// #include <wx/timer.h>
+// #include <wx/menu.h>
 
 class wxImagePanel : public wxPanel
 {
